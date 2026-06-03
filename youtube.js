@@ -22,7 +22,7 @@ async function fetchLatestVideo() {
 export async function startYouTubePoller(client) {
   // Seed lastVideoId on startup so we don't post old videos on boot
   const seed = await fetchLatestVideo();
-  if (seed) lastVideoId = 'seed.id.videoId';
+  if (seed) lastVideoId = seed.id.videoId;
   console.log(`YouTube poller started. Seed video: ${lastVideoId}`);
 
   setInterval(async () => {
