@@ -16,11 +16,26 @@
   "author": "Shay DeWael",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.16.1",
     "discord-interactions": "^4.0.0",
-    "dotenv": "^16.0.3",
-    "express": "^4.18.2"
+    "discord.js": "^14.26.4",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "googleapis": "^173.0.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
-  }
+  },
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jtorossian/HeroMania-OrbBot.git"
+  },
+  "keywords": [],
+  "bugs": {
+    "url": "https://github.com/jtorossian/HeroMania-OrbBot/issues"
+  },
+  "homepage": "https://github.com/jtorossian/HeroMania-OrbBot#readme"
 }

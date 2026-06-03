@@ -1,71 +1,34 @@
+import { Client, GatewayIntentBits, EmbedBuilder } from 'discord.js';
 import 'dotenv/config';
-import express from 'express';
-import {
-  ButtonStyleTypes,
-  InteractionResponseFlags,
-  InteractionResponseType,
-  InteractionType,
-  MessageComponentTypes,
-  verifyKeyMiddleware,
-} from 'discord-interactions';
-import { getRandomEmoji, DiscordRequest } from './utils.js';
-import { getShuffledOptions, getResult } from './game.js';
+import { startYouTubePoller } from './youtube.js';
 
-// Create an express app
-const app = express();
-// Get port, or default to 3000
-const PORT = process.env.PORT || 3000;
-// To keep track of our active games
-const activeGames = {};
-
-/**
- * Interactions endpoint URL where Discord will send HTTP requests
- * Parse request body and verifies incoming requests using discord-interactions package
- */
-app.post('/interactions', verifyKeyMiddleware(process.env.PUBLIC_KEY), async function (req, res) {
-  // Interaction id, type and data
-  const { id, type, data } = req.body;
-
-  /**
-   * Handle verification requests
-   */
-  if (type === InteractionType.PING) {
-    return res.send({ type: InteractionResponseType.PONG });
-  }
-
-  /**
-   * Handle slash command requests
-   * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
-   */
-  if (type === InteractionType.APPLICATION_COMMAND) {
-    const { name } = data;
-
-    // "test" command
-    if (name === 'test') {
-      // Send a message into the channel where command was triggered from
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: {
-          flags: InteractionResponseFlags.IS_COMPONENTS_V2,
-          components: [
-            {
-              type: MessageComponentTypes.TEXT_DISPLAY,
-              // Fetches a random emoji to send from a helper function
-              content: `hello world ${getRandomEmoji()}`
-            }
-          ]
-        },
-      });
-    }
-
-    console.error(`unknown command: ${name}`);
-    return res.status(400).json({ error: 'unknown command' });
-  }
-
-  console.error('unknown interaction type', type);
-  return res.status(400).json({ error: 'unknown interaction type' });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,   // required for member events
+  ],
 });
 
-app.listen(PORT, () => {
-  console.log('Listening on port', PORT);
+client.on('guildMemberAdd', async (member) => {
+  const channel = member.guild.channels.cache.get(process.env.WELCOME_CHANNEL_ID);
+  if (!channel) return;
+    await channel.send(
+    `Hey there! I'm the Hero O.R.B and I would like to personally welcome you, ${member}, to the official Hero Mania Server!\n` +
+    `Here you will be able to follow updates for the project, talk with other HeroManiacs, or even compete in our offical Hero Mania game lobbies! (Using steam remote play)\n` +
+    `Before you run off though I just have a few things I NEED you to do, or don't. I have no control over you but I will get sad if you ignore me 😔\n` +
+    `Anyways be sure to do the following!\n` +
+    `🎮 Wishlist Hero Mania: <https://store.steampowered.com/app/1933520/Hero_Mania/>\n` +
+    `📋 Read the rules: <#${process.env.RULES_CHANNEL_ID}>\n` +
+    `📺 Subscribe on YouTube: <https://www.youtube.com/@cosmictonic9736>\n` +
+    `🎵 Follow on Tik Tok: <https://www.tiktok.com/@cosmic_tonic>\n` +
+    `Follow our other social medias if you want but we don't really care about those ones as much tbh lol\n` +
+    `Alright now have fun, get chatting with the other HeroManiacs and have a great day!\n`
+    );
 });
+
+client.once('ready', (c) => {
+  console.log(`Logged in as ${c.user.tag}`);
+  startYouTubePoller(client);
+});
+
+client.login(process.env.DISCORD_TOKEN);
